@@ -1,14 +1,23 @@
 const expect = require('chai').expect;
 const fs = require('fs');
-const jsdomify = require('jsdomify');
+const jsdom = require('jsdom');
+const electron = require("electron");
 
+var window;
+var document;
 describe('index.html test suite', function () {
   before(function (done) {
-    fs.readFile("index.html", 'utf8', function (err, file) {
-      if (err) {
-        return done('Error');
+    window = jsdom.jsdom(fs.readFileSync('index.html'), {
+      features: {
+        FetchExternalResources: ['script'],
+        ProcessExternalResources: ['script']
       }
-      jsdomify.default.create(file);
+    }).defaultView;
+
+    window.require = require;
+    document = window.document;
+    window.addEventListener('load', function () {
+      console.log(window.document.body.innerHTML);
       done();
     });
   });
